@@ -30,7 +30,9 @@ jobs:
       - name: Install build packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends nasm wine gcc-mingw-w64-i686 xz-utils
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends nasm wine64 wine32 gcc-mingw-w64-i686 xz-utils
 
       - name: Rust Windows target, cbindgen, libclang
         run: |
