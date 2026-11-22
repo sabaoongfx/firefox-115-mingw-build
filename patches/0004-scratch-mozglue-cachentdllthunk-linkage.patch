@@ -1,0 +1,20 @@
+--- a/toolkit/xre/dllservices/mozglue/CacheNtDllThunk.cpp
++++ b/toolkit/xre/dllservices/mozglue/CacheNtDllThunk.cpp
+@@ -18,7 +18,7 @@
+ // XREMain::XRE_main, which happens long before WindowsProcessLauncher's ctor
+ // accesses sCachedNtDllThunk, there is no race on sCachedNtDllThunk, thus
+ // no mutex is needed.
+-static void CacheNtDllThunk() {
++void CacheNtDllThunk() {
+   if (sCachedNtDllThunk) {
+     return;
+   }
+@@ -53,7 +53,7 @@
+   sCachedNtDllThunk = new Buffer<IMAGE_THUNK_DATA>();
+ }
+ 
+-static Buffer<IMAGE_THUNK_DATA>* GetCachedNtDllThunk() {
++Buffer<IMAGE_THUNK_DATA>* GetCachedNtDllThunk() {
+   return sCachedNtDllThunk;
+ }
+ 

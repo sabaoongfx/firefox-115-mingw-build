@@ -1,0 +1,82 @@
+name: build-firefox-115-mingw
+
+# Manual trigger only: a build is started from the Actions tab, never on push.
+on:
+  workflow_dispatch:
+
+env:
+  FF_TARBALL_URL: https://archive.mozilla.org/pub/firefox/releases/115.45.0esr/source/firefox-115.45.0esr.source.tar.xz
+  # SHA512 from https://archive.mozilla.org/pub/firefox/releases/115.45.0esr/SHA512SUMS
+  FF_SHA512: 3ff2e1e512650fcfc491bd0b437b43d36d03d067ff10b829756b2a4be8b7b8d6c3562e0f9c153b841d698ea2d998e59ab4bf290b4a5defcb318cbe8e9231e073
+  LLVM_MINGW_URL: https://github.com/mstorsjo/llvm-mingw/releases/download/20230614/llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64.tar.xz
+  WORK: ${{ github.workspace }}/work
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - name: Free disk space on the runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /usr/local/share/boost
+          df -h /
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends nasm wine gcc-mingw-w64-i686 xz-utils
+
+      - name: Rust Windows target, cbindgen, libclang
+        run: |
+          rustup target add i686-pc-windows-gnu
+          cargo install cbindgen --version 0.24.3 --root "$WORK/tools"
+          python3 -m venv "$WORK/venv"
+          "$WORK/venv/bin/pip" install --quiet libclang
+          LC=$(find "$WORK/venv" -name 'libclang.so' | head -1)
+          echo "LIBCLANG_DIR=$(dirname "$LC")" >> "$GITHUB_ENV"
+
+      - name: Fetch and verify Firefox source, mingw-clang
+        run: |
+          mkdir -p "$WORK" && cd "$WORK"
+          curl -sSL -o ff.tar.xz "$FF_TARBALL_URL"
+          echo "$FF_SHA512  ff.tar.xz" | sha512sum -c -
+          tar -xf ff.tar.xz && mv firefox-115.45.0 src
+          curl -sSL -o llvm.tar.xz "$LLVM_MINGW_URL"
+          tar -xf llvm.tar.xz
+
+      - name: Apply scratch patches and stand-ins
+        run: |
+          cd "$WORK/src"
+          for p in "$GITHUB_WORKSPACE"/patches/*.patch; do patch -p1 < "$p"; done
+          cp -r "$GITHUB_WORKSPACE/third_party/glslopt-shim" third_party/
+          mkdir -p "$WORK/stubs"
+          i686-w64-mingw32-gcc -O2 -static -o "$WORK/stubs/fxc.exe" "$GITHUB_WORKSPACE/stubs/fake_fxc.c"
+          : > "$WORK/stubs/d3dcompiler_47.dll"
+          sed -e "s#@WORK@#$WORK#g" -e "s#@LIBCLANG_DIR@#$LIBCLANG_DIR#g" \
+            "$GITHUB_WORKSPACE/mozconfig.in" > "$WORK/mozconfig"
+
+      - name: Configure and build
+        run: |
+          cd "$WORK/src"
+          export MOZCONFIG="$WORK/mozconfig"
+          export PYTHON3="$pythonLocation/bin/python3"
+          ./mach configure
+          ./mach build
+
+      - name: Package the build output
+        if: success()
+        run: |
+          cd "$WORK/obj/dist"
+          zip -r -q "$GITHUB_WORKSPACE/firefox-115-mingw-dist.zip" bin
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: firefox-115-mingw-dist
+          path: firefox-115-mingw-dist.zip
+          retention-days: 3

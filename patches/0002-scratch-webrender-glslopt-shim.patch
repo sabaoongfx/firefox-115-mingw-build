@@ -1,0 +1,11 @@
+--- a/gfx/wr/webrender/Cargo.toml
++++ b/gfx/wr/webrender/Cargo.toml
+@@ -23,7 +23,7 @@
+ 
+ [build-dependencies]
+ build-parallel = "0.1.2"
+-glslopt = "0.1.9"
++glslopt = { path = "../../../third_party/glslopt-shim" }
+ webrender_build = { version = "0.0.2", path = "../webrender_build" }
+ 
+ [dependencies]

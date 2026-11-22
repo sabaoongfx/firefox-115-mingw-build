@@ -1,0 +1,32 @@
+# Firefox 115.45.0esr, mingw-clang cross-build for 32-bit Windows (scratch build for the ReactOS work).
+# @WORK@ and @LIBCLANG_DIR@ are filled in by the workflow.
+ac_add_options --enable-application=browser
+ac_add_options --target=i686-w64-mingw32
+ac_add_options --host=x86_64-pc-linux-gnu
+ac_add_options --disable-tests
+ac_add_options --disable-updater
+ac_add_options --disable-crashreporter
+ac_add_options --disable-accessibility
+ac_add_options --disable-necko-wifi
+ac_add_options --disable-webrtc
+ac_add_options --without-wasm-sandboxed-libraries
+ac_add_options --enable-release
+ac_add_options --disable-lto
+ac_add_options --disable-debug-symbols
+ac_add_options --with-libclang-path=@LIBCLANG_DIR@
+mk_add_options MOZ_OBJDIR=@WORK@/obj
+mk_add_options MOZ_MAKE_FLAGS="-j4"
+export PATH=@WORK@/llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64/bin:@WORK@/tools/bin:@WORK@/stubs:$PATH
+export CC=i686-w64-mingw32-clang
+export CXX=i686-w64-mingw32-clang++
+export AR=llvm-ar
+export RANLIB=llvm-ranlib
+export STRIP=llvm-strip
+export HOST_CC=gcc
+export HOST_CXX=g++
+export CBINDGEN=@WORK@/tools/bin/cbindgen
+export LIBCLANG_PATH=@LIBCLANG_DIR@
+export FXC=@WORK@/stubs/fxc.exe
+export CXXFLAGS="-fms-extensions"
+export DEVELOPER_OPTIONS=1
+export CARGO_PROFILE_RELEASE_DEBUG=0

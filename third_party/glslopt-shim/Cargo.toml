@@ -1,0 +1,8 @@
+[package]
+name = "glslopt"
+version = "0.1.9"
+edition = "2018"
+description = "Local pass-through stand-in for glslopt (no optimization). Build-only for the scratch Firefox 115 MinGW build."
+license = "MPL-2.0"
+[lib]
+path = "src/lib.rs"
