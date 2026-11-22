@@ -57,7 +57,9 @@ jobs:
           H="$WORK/llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64/i686-w64-mingw32/include/windows.ui.composition.h"
           sed -i -e 's/enum DirectXAlphaMode/enum ABI::Windows::Graphics::DirectX::DirectXAlphaMode/g' \
                  -e 's/enum DirectXPixelFormat/enum ABI::Windows::Graphics::DirectX::DirectXPixelFormat/g' "$H"
+          sed -i -E 's/struct (Vector[234]|Matrix4x4|Quaternion)\b/struct ABI::Windows::Foundation::Numerics::\1/g' "$H"
           grep -c "ABI::Windows::Graphics::DirectX::" "$H"
+          grep -c "ABI::Windows::Foundation::Numerics::" "$H"
 
       - name: Apply scratch patches and stand-ins
         run: |
