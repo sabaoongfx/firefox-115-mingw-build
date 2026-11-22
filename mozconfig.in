@@ -13,6 +13,8 @@ ac_add_options --without-wasm-sandboxed-libraries
 ac_add_options --enable-release
 ac_add_options --disable-lto
 ac_add_options --disable-warnings-as-errors
+ac_add_options --disable-default-browser-agent
+ac_add_options --disable-notification-server
 ac_add_options --disable-debug-symbols
 ac_add_options --with-libclang-path=@LIBCLANG_DIR@
 mk_add_options MOZ_OBJDIR=@WORK@/obj
