@@ -52,6 +52,13 @@ jobs:
           curl -sSL -o llvm.tar.xz "$LLVM_MINGW_URL"
           tar -xf llvm.tar.xz
 
+      - name: Qualify DirectX enum names in the mingw composition header (scratch)
+        run: |
+          H="$WORK/llvm-mingw-20230614-ucrt-ubuntu-20.04-x86_64/i686-w64-mingw32/include/windows.ui.composition.h"
+          sed -i -e 's/enum DirectXAlphaMode/enum ABI::Windows::Graphics::DirectX::DirectXAlphaMode/g' \
+                 -e 's/enum DirectXPixelFormat/enum ABI::Windows::Graphics::DirectX::DirectXPixelFormat/g' "$H"
+          grep -c "ABI::Windows::Graphics::DirectX::" "$H"
+
       - name: Apply scratch patches and stand-ins
         run: |
           cd "$WORK/src"
