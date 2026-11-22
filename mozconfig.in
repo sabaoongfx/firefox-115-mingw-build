@@ -31,5 +31,6 @@ export CBINDGEN=@WORK@/tools/bin/cbindgen
 export LIBCLANG_PATH=@LIBCLANG_DIR@
 export FXC=@WORK@/stubs/fxc.exe
 export CXXFLAGS="-fms-extensions"
+export LDFLAGS="-lsynchronization"
 export DEVELOPER_OPTIONS=1
 export CARGO_PROFILE_RELEASE_DEBUG=0
